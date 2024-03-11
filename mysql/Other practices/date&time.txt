@@ -1,0 +1,182 @@
+Last login: Sat Jun 11 22:18:33 on ttys001
+
+mysql> -- DATE & TIME
+mysql> select curdate(), dayofweek(curdate()) as 'day of week';
++------------+-------------+
+| curdate()  | day of week |
++------------+-------------+
+| 2022-06-11 |           7 |
++------------+-------------+
+1 row in set (0.00 sec)
+
+mysql> select sysdate();
++---------------------+
+| sysdate()           |
++---------------------+
+| 2022-06-11 17:42:17 |
++---------------------+
+1 row in set (0.00 sec)
+
+mysql> select year(str_to_date('10-6-1940', '%y-%m-%d'))'day of week';
++-------------+
+| day of week |
++-------------+
+|        2010 |
++-------------+
+1 row in set, 1 warning (0.00 sec)
+
+mysql> select year(str_to_date('10-6-1940', '%d-%m-%y'))'year';
++-------------+
+| year	      |
++-------------+
+|        2019 |
++-------------+
+1 row in set, 1 warning (0.00 sec)
+
+mysql> select year(str_to_date('10-6-1940', '%d-%m-%Y'))'day of week';
++-------------+
+| day of week |
++-------------+
+|        1940 |
++-------------+
+1 row in set (0.00 sec)
+
+mysql> select day(str_to_date('10-6-1940', '%d-%m-%Y'))'day';
++-------------+
+| day	      |
++-------------+
+|          10 |
++-------------+
+1 row in set, 1 warning (0.01 sec)
+
+mysql> select dayname(str_to_date('10-6-1940', '%d-%m-%y'))'day-name';
++-------------+
+| day-name    |
++-------------+
+| Monday      |
++-------------+
+1 row in set, 1 warning (0.00 sec)
+
+mysql> select dayofweek(str_to_date('10-6-1940', '%d-%m-%Y'))'day of week';
++-------------+
+| day of week |
++-------------+
+|           2 |
++-------------+
+1 row in set, 1 warning (0.00 sec)
+
+mysql> select str_to_date('10-6-1940', '%d-%m-%y');
++--------------------------------------+
+| str_to_date('10-6-1940', '%d-%m-%y') |
++--------------------------------------+
+| 2019-06-10                           |
++--------------------------------------+
+1 row in set, 1 warning (0.00 sec)
+
+mysql> select str_to_date('10-6-1940', '%d-%m-%Y');
++--------------------------------------+
+| str_to_date('10-6-1940', '%d-%m-%Y') |
++--------------------------------------+
+| 1940-06-10                           |
++--------------------------------------+
+1 row in set (0.00 sec)
+
+mysql> -- Finding last day of month
+mysql> -- last sunday of month
+mysql> set @data = curdate(); 
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> select str_to_date(last_day(@data) - ((7 + weekday(last_day(@data)) - 6) % 7),"%Y%m%d") as 'last sunday'; -- 2011-04-24
++-------------+
+| last sunday |
++-------------+
+| 2022-06-26  |
++-------------+
+1 row in set (0.00 sec)
+
+mysql> 
+mysql> -- last saturday
+mysql> set @data1 = curdate(); 
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> select str_to_date(last_day(@data1) - ((7 + weekday(last_day(@data1)) - 5) % 7),"%Y%m%d")as 'last saturday'; -- 2011-04-30
++---------------+
+| last saturday |
++---------------+
+| 2022-06-25    |
++---------------+
+1 row in set (0.00 sec)
+
+mysql> 
+mysql> -- last friday
+mysql> set @data2 = curdate(); 
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> select str_to_date(last_day(@data2) - ((7 + weekday(last_day(@data2)) - 4) % 7),"%Y%m%d")as 'last friday'; -- 2011-04-29
++-------------+
+| last friday |
++-------------+
+| 2022-06-24  |
++-------------+
+1 row in set (0.00 sec)
+
+mysql> 
+mysql> -- last thursday
+mysql> set @data3 = curdate(); 
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> select str_to_date(last_day(@data3) - ((7 + weekday(last_day(@data3)) - 3) % 7),"%Y%m%d")as 'last thursday'; -- 2011-04-28
++---------------+
+| last thursday |
++---------------+
+| 2022-06-30    |
++---------------+
+1 row in set (0.00 sec)
+
+mysql> 
+mysql> -- last wednesday
+mysql> set @data4 = curdate(); 
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> select str_to_date(last_day(@data4) - ((7 + weekday(last_day(@data4)) - 2) % 7),"%Y%m%d")as 'last wednesday'; -- 2011-04-27
++----------------+
+| last wednesday |
++----------------+
+| 2022-06-29     |
++----------------+
+1 row in set (0.00 sec)
+
+mysql> 
+mysql> -- last tuesday
+mysql> set @data5 = curdate(); 
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> select str_to_date(last_day(@data5) - ((7 + weekday(last_day(@data5)) - 1) % 7),"%Y%m%d")as 'last tuesday'; -- 2011-04-26
++--------------+
+| last tuesday |
++--------------+
+| 2022-06-28   |
++--------------+
+1 row in set (0.00 sec)
+
+mysql> 
+mysql> -- last monday
+mysql> set @data = curdate(); 
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> select str_to_date(last_day(@data) - ((7 + weekday(last_day(@data))) % 7),"%Y%m%d")as 'last monday'; -- 2011-04-25
++-------------+
+| last monday |
++-------------+
+| 2022-06-27  |
++-------------+
+1 row in set (0.00 sec)
+
+mysql> 
+mysql> SELECT dayname(DATE_SUB(@d,INTERVAL DAYOFMONTH(@d)-1 DAY)) AS '1st of month';
++--------------+
+| 1st of month |
++--------------+
+| Wednesday    |
++--------------+
+1 row in set (0.00 sec)

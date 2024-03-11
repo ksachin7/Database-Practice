@@ -1,0 +1,34 @@
+mysql> -- To see all user procedure in a user_db
+mysql> select routine_name, routine_type,definer,created,security_type,SQL_Data_Access from information_schema.routines where routine_type='PROCEDURE' and routine_schema='assignment1'//
++---------------+--------------+----------------+---------------------+---------------+-----------------+
+| ROUTINE_NAME  | ROUTINE_TYPE | DEFINER        | CREATED             | SECURITY_TYPE | SQL_DATA_ACCESS |
++---------------+--------------+----------------+---------------------+---------------+-----------------+
+| addRow        | PROCEDURE    | root@localhost | 2022-06-17 16:04:43 | DEFINER       | CONTAINS SQL    |
+| createTable   | PROCEDURE    | root@localhost | 2022-06-19 21:02:12 | DEFINER       | CONTAINS SQL    |
+| d             | PROCEDURE    | root@localhost | 2022-06-16 14:12:41 | DEFINER       | CONTAINS SQL    |
+| ddiff         | PROCEDURE    | root@localhost | 2022-06-19 22:51:41 | DEFINER       | CONTAINS SQL    |
+| dis           | PROCEDURE    | root@localhost | 2022-06-19 01:17:12 | DEFINER       | CONTAINS SQL    |
+| disp          | PROCEDURE    | root@localhost | 2022-06-19 07:49:38 | DEFINER       | CONTAINS SQL    |
+| display       | PROCEDURE    | root@localhost | 2022-06-16 12:01:50 | DEFINER       | CONTAINS SQL    |
+| display_Emp   | PROCEDURE    | root@localhost | 2022-06-19 11:19:56 | DEFINER       | CONTAINS SQL    |
+| emp_info      | PROCEDURE    | root@localhost | 2022-06-19 22:05:17 | DEFINER       | CONTAINS SQL    |
+| findcom       | PROCEDURE    | root@localhost | 2022-06-17 10:52:26 | DEFINER       | CONTAINS SQL    |
+| getsal        | PROCEDURE    | root@localhost | 2022-06-17 09:40:12 | DEFINER       | CONTAINS SQL    |
+| new_procedure | PROCEDURE    | root@localhost | 2022-06-17 01:29:27 | DEFINER       | CONTAINS SQL    |
+| sayHi         | PROCEDURE    | root@localhost | 2022-06-16 10:02:02 | DEFINER       | CONTAINS SQL    |
+| showDeatil    | PROCEDURE    | root@localhost | 2022-06-16 10:03:53 | DEFINER       | CONTAINS SQL    |
+| showDetails   | PROCEDURE    | root@localhost | 2022-06-16 14:22:58 | DEFINER       | CONTAINS SQL    |
++---------------+--------------+----------------+---------------------+---------------+-----------------+
+15 rows in set (0.01 sec)
+
+mysql> -- To see how a procedure created
+mysql> show create procedure display//
++-----------+-----------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------------+----------------------+--------------------+
+| Procedure | sql_mode                                                                                                              | Create Procedure                                                                                                                                                               | character_set_client | collation_connection | Database Collation |
++-----------+-----------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------------+----------------------+--------------------+
+| display   | ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION | CREATE DEFINER=`root`@`localhost` PROCEDURE `display`()
+begin
+select dname, count(e.empname) from dept d join emp e using(deptno)group by dname having count(empname) > 5;
+end | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
++-----------+-----------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------------+----------------------+--------------------+
+1 row in set (0.01 sec)

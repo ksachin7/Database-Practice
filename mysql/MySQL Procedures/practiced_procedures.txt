@@ -1,0 +1,355 @@
+Stored procedure
+1.Create a procedure for adding a row in emp table. Display number of rows added. Handle corresponding exception
+Delimiter //
+create procedure addRow(in eno int, in ename varchar(15), in _job varchar(15), in _mgr int, in _hiredate date, in _sal decimal(7, 2), in _comm decimal(7, 2), in _deptno int)
+    begin
+	declare exit handler for 1048
+	begin
+	insert into dupemp(empno, empname, job, mgr, hiredate, sal, comm, deptno) values(eno, ename, _job, _mgr, _hiredate, _sal, _comm, _deptno);
+    select row_count();
+	end;
+	select concat(ename, “ is already inserted in the table”) message;
+    end//
+
+2.Create a procedure which takes employee number as parameter and delete the employee record. Procedure must return the empname whose record has be deleted.
+Create procedure del(in empno int)
+Begin
+select empname from dupemp where eno= empno;
+Delete from dupemp where eno= empno;
+End //
+
+3.Create a procedure which takes department name as paramater and displays all the employee records, no of employee in that department. mysql> Create procedure dis(in d_name varchar(11))
+    -> Begin
+    -> Select * from emp where deptno in (select deptno from dept where dname = d_name);
+    -> select count(*) as no_of_emp from emp where deptno in (select deptno from dept where dname = d_name);
+    -> End//
+
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> call dis('Research') //
++-------+---------+---------+------+------------+---------+------+--------+
+| empno | empname | job     | mgr  | hiredate   | sal     | comm | deptno |
++-------+---------+---------+------+------------+---------+------+--------+
+|  7369 | SMITH   | CLERK   | 7902 | 1980-12-17 |  800.00 | NULL |     20 |
+|  7566 | JONES   | MANAGER | 7839 | 1981-04-02 | 2975.00 | NULL |     20 |
+|  7788 | SCOTT   | ANALYST | 7566 | 1987-04-19 | 3000.00 | NULL |     20 |
+|  7876 | ADAMS   | CLERK   | 7788 | 1987-05-23 | 1100.00 | NULL |     20 |
+|  7902 | FORD    | ANALYST | 7566 | 1981-12-03 | 3000.00 | NULL |     20 |
++-------+---------+---------+------+------------+---------+------+--------+
+5 rows in set (0.00 sec)
+
++-----------+
+| no_of_emp |
++-----------+
+|         5 |
++-----------+
+1 row in set (0.00 sec)
+
+Query OK, 0 rows affected (0.00 sec)
+
+
+4.Create a procedure which takes empno as IN parameter and gives OUT entire record of the employee
+mysql> alter table dupemp rename column empno to eno //
+Query OK, 0 rows affected (0.04 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> drop procedure if exists emp_info //
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> Create procedure emp_info(in empno int)
+    -> Begin
+    -> select * from dupemp where eno = empno;
+    -> End//
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> call emp_info(7369) //
++------+---------+-------+------+------------+--------+------+--------+
+| eno  | empname | job   | mgr  | hiredate   | sal    | comm | deptno |
++------+---------+-------+------+------------+--------+------+--------+
+| 7369 | SMITH   | CLERK | 7902 | 1980-12-17 | 800.00 | NULL |     20 |
++------+---------+-------+------+------------+--------+------+--------+
+1 row in set (0.01 sec)
+
+Query OK, 0 rows affected (0.01 sec)
+
+5.create a prcedure which would accept 2 dates as arguments and returns difference between them in years and months Eg: "3 years 6 months"
+
+mysql> drop procedure if exists ddiff//
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> Create procedure ddiff(in date1 date, in date2 date)
+    -> Begin
+    -> declare year int;
+    -> declare month int;
+    -> set month= timestampdiff(month, date1, date2)%12;
+    -> set year= timestampdiff(month, date1, date2)/12;
+    -> select concat(year, '-Years ', month, '-months') as date_difference;
+    -> End//
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> call ddiff('1972-12-17' , '1976-6-11') //
+
++------------------+
+| date_difference  |
++------------------+
+| 3-Years 5-months |
++------------------+
+1 row in set (0.00 sec)
+
+Query OK, 0 rows affected (0.00 sec)
+
+Cursor
+6.Design a cursor program in which you select empno, ename, job, sal into a collection and display the same for any department number passed as argument to cursor.
+
+drop procedure if exists disemp//
+mysql> Create procedure disemp(in dno int)
+    -> Begin
+    -> declare empno int;
+    -> declare empname varchar(11);
+    -> declare empjob varchar(11);
+    -> declare empsal int;
+    -> --
+    -> declare eof int default 0;
+    -> declare c cursor for select eno, ename, job, sal from dupemp where deptno= dno;
+    -> declare continue handler for not found set eof= 1;
+    -> --
+    -> open c;
+    -> findresult: loop
+    -> fetch c into empno, empname, empjob, empsal;
+    -> if(eof=1) then
+    -> leave findresult;
+    -> end if;
+    -> select empno, empname, empjob as job, empsal as sal;
+    -> end loop;
+    -> close c;
+    -> --
+    -> End//
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> call disemp(30)//
++-------+---------+----------+------+
+| empno | empname | job      | sal  |
++-------+---------+----------+------+
+|  7499 | ALLEN   | SALESMAN | 1600 |
++-------+---------+----------+------+
+1 row in set (0.00 sec)
+
++-------+---------+----------+------+
+| empno | empname | job      | sal  |
++-------+---------+----------+------+
+|  7521 | WARD    | SALESMAN | 1250 |
++-------+---------+----------+------+
+1 row in set (0.00 sec)
+
++-------+---------+----------+------+
+| empno | empname | job      | sal  |
++-------+---------+----------+------+
+|  7654 | MARTIN  | SALESMAN | 1250 |
++-------+---------+----------+------+
+1 row in set (0.00 sec)
+
++-------+---------+---------+------+
+| empno | empname | job     | sal  |
++-------+---------+---------+------+
+|  7698 | BLAKE   | MANAGER | 2850 |
++-------+---------+---------+------+
+1 row in set (0.00 sec)
+
++-------+---------+----------+------+
+| empno | empname | job      | sal  |
++-------+---------+----------+------+
+|  7844 | TURNER  | SALESMAN | 1500 |
++-------+---------+----------+------+
+1 row in set (0.00 sec)
+
++-------+---------+-------+------+
+| empno | empname | job   | sal  |
++-------+---------+-------+------+
+|  7900 | JAMES   | CLERK |  950 |
++-------+---------+-------+------+
+1 row in set (0.00 sec)
+
+Query OK, 0 rows affected (0.00 sec)
+
+7.Create table with following structures
+- emp_bonus(empno,ename,annual_salary,bonus)
+
+- using cursor program fetch empno,ename,sal,comm from emp table.
+- for each record fetched find annual salary which includes comm
+- compute various percentage of bonus based on annual salary.
+- insert empno,ename,annual_salary,bonus into emp_bonus table
+- display number of rows inserted.
+
+mysql> drop procedure if exists createTable//
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> drop table if exists emp_bonus//
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> create table emp_bonus(empno int, ename varchar(15), annual_salary decimal(11, 2), bonus decimal(7, 2))//
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> create procedure createTable()
+    -> begin
+    -> declare eid int;
+    -> declare ename varchar(15);
+    -> declare sal decimal(11,2);
+    -> declare comm decimal(7,2);
+    -> declare pb decimal(7,2);
+    -> --
+    -> declare eof int default 0;
+    -> declare c cursor for select empno, ename, annual_salary, bonus from emp_bonus;
+    -> declare continue handler for not found set eof=1;
+    -> --
+    -> insert into emp_bonus values
+    -> (101, 'Smith', 1150000, 30000),
+    -> (102, 'Allen', 650000, 3000),
+    -> (103, 'Jones', 635000, 20000),
+    -> (104, 'Clark', 735000, 40000),
+    -> (105, 'James', 435000, 2000);
+    -> select row_count() as inserted_rows;
+    -> --
+    -> open c;
+    -> findresult: loop
+    -> fetch c into eid, ename, sal, comm;
+    -> if(eof=1) then
+    -> leave findresult;
+    -> end if;
+    -> set pb=comm*100/(sal*12);
+    -> select eid, ename, sal, sal*12 as 'annual_sal', comm, pb as '%bonus';
+    -> end loop;
+    -> close c;
+    -> end //
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> call createTable() //
++---------------+
+| inserted_rows |
++---------------+
+|             5 |
++---------------+
+1 row in set (0.01 sec)
+
++------+-------+------------+-------------+----------+--------+
+| eid  | ename | sal        | annual_sal  | comm     | %bonus |
++------+-------+------------+-------------+----------+--------+
+|  101 | NULL  | 1150000.00 | 13800000.00 | 30000.00 |   0.22 |
++------+-------+------------+-------------+----------+--------+
+1 row in set (0.01 sec)
+
++------+-------+-----------+------------+---------+--------+
+| eid  | ename | sal       | annual_sal | comm    | %bonus |
++------+-------+-----------+------------+---------+--------+
+|  102 | NULL  | 650000.00 | 7800000.00 | 3000.00 |   0.04 |
++------+-------+-----------+------------+---------+--------+
+1 row in set (0.01 sec)
+
++------+-------+-----------+------------+----------+--------+
+| eid  | ename | sal       | annual_sal | comm     | %bonus |
++------+-------+-----------+------------+----------+--------+
+|  103 | NULL  | 635000.00 | 7620000.00 | 20000.00 |   0.26 |
++------+-------+-----------+------------+----------+--------+
+1 row in set (0.01 sec)
+
++------+-------+-----------+------------+----------+--------+
+| eid  | ename | sal       | annual_sal | comm     | %bonus |
++------+-------+-----------+------------+----------+--------+
+|  104 | NULL  | 735000.00 | 8820000.00 | 40000.00 |   0.45 |
++------+-------+-----------+------------+----------+--------+
+1 row in set (0.01 sec)
+
++------+-------+-----------+------------+---------+--------+
+| eid  | ename | sal       | annual_sal | comm    | %bonus |
++------+-------+-----------+------------+---------+--------+
+|  105 | NULL  | 435000.00 | 5220000.00 | 2000.00 |   0.04 |
++------+-------+-----------+------------+---------+--------+
+1 row in set (0.01 sec)
+
+Query OK, 0 rows affected (0.01 sec)
+
+8.Write a procedure  to create a cursor displays the name and salary of each employee in the EMPLOYEES table whose salary is less than that specified by a passed-in parameter value.
+mysql> create procedure disp(in min_sal int)
+    -> begin
+    -> declare ename varchar(15);
+    -> declare salary decimal(11, 2);
+    -> 
+    -> declare eof int default 0;
+    -> declare c cursor for select empname, sal from emp where sal< min_sal;
+    -> declare continue handler for not found set eof=1;
+    -> 
+    -> open c;
+    -> findresult:loop
+    -> fetch c into ename, salary;
+    -> if(eof =1) then
+    -> leave findresult;
+    -> end if;
+    -> select ename, salary;
+    -> end loop;
+    -> close c;
+    -> end //
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> call disp(1100) //
++-------+--------+
+| ename | salary |
++-------+--------+
+| SMITH | 800.00 |
++-------+--------+
+1 row in set (0.01 sec)
+
++-------+--------+
+| ename | salary |
++-------+--------+
+| JAMES | 950.00 |
++-------+--------+
+1 row in set (0.01 sec)
+Query OK, 0 rows affected (0.02 sec
+
+
+9.Write a procedure to display employee id, name, hire date, and the incentive amount they achieved according to their working experiences.
+mysql> create procedure display_Emp()
+    -> begin
+    -> select  empno, empname, hiredate,
+    -> TIMESTAMPDIFF(YEAR, hiredate, curdate()) * 12 *(sal) as `total_ incentive_amount`
+    -> from emp;
+    -> end// 
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> call display_emp()//
++-------+---------+------------+-------------------------+
+| empno | empname | hiredate   | total_ incentive_amount |
++-------+---------+------------+-------------------------+
+|  7369 | SMITH   | 1980-12-17 |               393600.00 |
+|  7499 | ALLEN   | 1981-02-20 |               787200.00 |
+|  7521 | WARD    | 1981-02-22 |               615000.00 |
+|  7566 | JONES   | 1981-04-02 |              1463700.00 |
+|  7654 | MARTIN  | 1981-09-28 |               600000.00 |
+|  7698 | BLAKE   | 1981-05-01 |              1402200.00 |
+|  7782 | CLARK   | 1981-06-09 |              1205400.00 |
+|  7788 | SCOTT   | 1987-04-19 |              1260000.00 |
+|  7839 | KING    | 1981-11-17 |              2400000.00 |
+|  7844 | TURNER  | 1981-09-08 |               720000.00 |
+|  7876 | ADAMS   | 1987-05-23 |               462000.00 |
+|  7900 | JAMES   | 1981-12-03 |               456000.00 |
+|  7902 | FORD    | 1981-12-03 |              1440000.00 |
+|  7934 | MILLER  | 1982-01-23 |               624000.00 |
++-------+---------+------------+-------------------------+
+14 rows in set (0.00 sec)
+
+Query OK, 0 rows affected (0.00 sec)
+
+
+
+Stored functions
+10.Create a function which takes department name as paramater and return the  no of employee working in that department. 
+Create function dep(dname varchar(15)) returns int
+declare r int;
+r= select count(*) from emp e inner join dept d on deptno where e.deptno= d.deptno;
+
+11.Write function to return the  department having more than five employees
+
+12.write a function to return the employee who is earning second max salary from a perticular department.
+
+13.write a function to return the employee who is having maximum experience from the emp table.
+
+
